@@ -1,0 +1,42 @@
+import React, { useState, useEffect } from "react";
+
+const Detail = ({ item, onClear }) => {
+    const [formData, setFormData] = useState(item || { name: "", price: "", year: "" });
+
+    // ✅ Ensure form updates when new item is selected
+    useEffect(() => {
+        setFormData(item || { name: "", price: "", year: "" });
+    }, [item]);
+
+    // ✅ Handle form field changes
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    return (
+        <div>
+            <h3>Editing: {formData.name || "No item selected"}</h3>
+            <form>
+                <label>
+                    Name:
+                    <input type="text" name="name" value={formData.name} onChange={handleChange} />
+                </label>
+                <br />
+                <label>
+                    Price:
+                    <input type="number" name="price" value={formData.price} onChange={handleChange} />
+                </label>
+                <br />
+                <label>
+                    Year:
+                    <input type="number" name="year" value={formData.year} onChange={handleChange} />
+                </label>
+                <br />
+                <button type="button" onClick={() => setFormData({ ...item })}>Reset</button>
+                <button type="button" onClick={onClear}>Clear</button>
+            </form>
+        </div>
+    );
+};
+
+export default Detail;

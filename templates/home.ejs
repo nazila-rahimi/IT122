@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple Products - React</title>
+
+   
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+
+    
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+
+    <h1>Apple Products</h1>
+
+    <div id="root"></div> 
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Product List Component
+        const ProductList = ({ products, onSelect }) => {
+            return (
+                <div>
+                    <h2>Product List</h2>
+                    {products.length === 0 ? (
+                        <p>No items found.</p>
+                    ) : (
+                        <ul>
+                            {products.map((product) => (
+                                <li key={product.id} onClick={() => onSelect(product)} style={{ cursor: "pointer", marginBottom: "10px", border: "1px solid #ddd", padding: "10px" }}>
+                                    {product.name} - ${product.price} (Year: {product.year})
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            );
+        };
+
+        // Detail Component
+        const Detail = ({ item, onClear }) => {
+            const [formData, setFormData] = useState(item || { name: "", price: "", year: "" });
+
+            // Update form when new item is selected
+            useEffect(() => {
+                setFormData(item || { name: "", price: "", year: "" });
+            }, [item]);
+
+            // Handle form field changes
+            const handleChange = (e) => {
+                setFormData({ ...formData, [e.target.name]: e.target.value });
+            };
+
+            return (
+                <div>
+                    <h2>Item Details</h2>
+                    {item ? (
+                        <form>
+                            <label>
+                                Name:
+                                <input type="text" name="name" value={formData.name} onChange={handleChange} />
+                            </label>
+                            <br />
+                            <label>
+                                Price:
+                                <input type="number" name="price" value={formData.price} onChange={handleChange} />
+                            </label>
+                            <br />
+                            <label>
+                                Year:
+                                <input type="number" name="year" value={formData.year} onChange={handleChange} />
+                            </label>
+                            <br />
+                            <button type="button" onClick={() => setFormData(item || { name: "", price: "", year: "" })}>Reset</button>
+                            <button type="button" onClick={onClear}>Clear</button>
+                        </form>
+                    ) : (
+                        <p>Select an item to see details.</p>
+                    )}
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [items, setItems] = useState([]);
+            const [selectedItem, setSelectedItem] = useState(null);
+
+            // Load data after rendering (useEffect)
+            useEffect(() => {
+                fetch("/api/items")
+                    .then((response) => response.json())
+                    .then((data) => setItems(data))
+                    .catch((error) => console.error("❌ Error fetching items:", error));
+            }, []); // Runs only once when the page loads
+
+            const handleSelect = (item) => {
+                setSelectedItem({ ...item }); // Create a copy to allow edits
+            };
+
+            const handleClear = () => {
+                setSelectedItem(null);
+            };
+
+            return (
+                <div style={{ display: "flex", gap: "20px", padding: "20px" }}>
+                    <ProductList products={items} onSelect={handleSelect} />
+                    <Detail item={selectedItem} onClear={handleClear} />
+                </div>
+            );
+        };
+
+        // Render React App inside "root" div
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+
+</body>
+</html>
